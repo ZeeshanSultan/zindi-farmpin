@@ -1,5 +1,18 @@
 from invoke import task
 
+data_urls= [
+    'https://farmpinzindi.blob.core.windows.net/farmpinzindi/2017-01-01.zip',
+    'https://farmpinzindi.blob.core.windows.net/farmpinzindi/2017-01-31.zip',
+    'https://farmpinzindi.blob.core.windows.net/farmpinzindi/2017-02-10.zip',
+    'https://farmpinzindi.blob.core.windows.net/farmpinzindi/2017-03-12.zip',
+    'https://farmpinzindi.blob.core.windows.net/farmpinzindi/2017-03-22.zip',
+    'https://farmpinzindi.blob.core.windows.net/farmpinzindi/2017-05-31.zip',
+    'https://farmpinzindi.blob.core.windows.net/farmpinzindi/2017-06-20.zip',
+    'https://farmpinzindi.blob.core.windows.net/farmpinzindi/2017-07-10.zip',
+    'https://farmpinzindi.blob.core.windows.net/farmpinzindi/2017-08-19.zip',
+    'https://farmpinzindi.blob.core.windows.net/farmpinzindi/2017-07-15.zip',
+    'https://farmpinzindi.blob.core.windows.net/farmpinzindi/2017-08-04.zip',
+]
 
 @task(help={
     'ip': 'IP to listen on, defaults to *',
@@ -41,11 +54,12 @@ def competition_list(ctx, search=None):
 @task(help={
     'competition': 'competition url prefix'
 })
-def competition_download_files(ctx, competition):
+def competition_download_files(ctx):
     """
     Download Kaggle competition files to ./data/raw folder
     """
-    cmd = 'kaggle competitions download -c {} -p ./data/raw/'.format(competition)
+
+    cmd='wget -i urls.txt -P ./data/raw/'
     ctx.run(cmd)
 
 
