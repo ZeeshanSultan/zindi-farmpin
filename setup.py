@@ -24,4 +24,13 @@ setup(
     description='Solution to the crop classification challenge on Zindi',
     python_requires='>=3',
     long_description=readme(),
+    install_requires=[
+        'numpy',
+        'xgboost',
+        'sklearn',
+        'geopandas',
+        'rasterio',
+        'invoke',
+        'sentinelhub'
+    ]
 )
