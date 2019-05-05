@@ -1,5 +1,15 @@
 from invoke import task
 
+
+@task
+def create_baseline_dataset(ctx):
+    from src.data.make_baseline_dataset import run
+    print('Creating training set\n')
+    run('train')
+    print('\nCreating testing set\n')
+    run('test')
+    print('done!')
+
 @task(help={
     'ip': 'IP to listen on, defaults to *',
     'extra': 'Port to listen on, defaults to 8888',
@@ -57,10 +67,4 @@ def competition_submit_files(ctx, path, message, competition):
     Submit Kaggle competition files
     """
     cmd = 'kaggle competitions submit', '-c {} -f {} -m {}'.format(competition, path, message)
-    ctx.run(cmd)
-
-
-@task()
-def create_baseline_dataset(ctx, ):
-    cmd = 'python src/data/make_baseline_dataset.py'
     ctx.run(cmd)

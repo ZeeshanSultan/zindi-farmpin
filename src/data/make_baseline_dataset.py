@@ -79,7 +79,9 @@ def mask_raster(shapes, raster):
     masks = {}
     for id, shape in shapes.items():
         mask = get_shape(shape, raster)
-        if mask is not None:
+        if mask is None:
+            masks[id] = np.ones(shape=(1, 10, 10))
+        else:
             masks[id] = mask
 
     return masks
@@ -163,7 +165,6 @@ def run(dataset='train'):
                 masks = mask_raster(shp_df.geometry, raster)
 
             logger.info(f'{len(masks)} farms successfully masked')
-
             # check_mask_data(masks[list(masks.keys())[0]])
 
             # Calculate descriptive stats for each mask
@@ -185,6 +186,6 @@ def run(dataset='train'):
 
 
 if __name__ == '__main__':
-    logger.setLevel(logging.WARNING)
+    logger.setLevel(logging.INFO)
     # run('train')
     run('test')
