@@ -1,19 +1,5 @@
 from invoke import task
 
-data_urls= [
-    'https://farmpinzindi.blob.core.windows.net/farmpinzindi/2017-01-01.zip',
-    'https://farmpinzindi.blob.core.windows.net/farmpinzindi/2017-01-31.zip',
-    'https://farmpinzindi.blob.core.windows.net/farmpinzindi/2017-02-10.zip',
-    'https://farmpinzindi.blob.core.windows.net/farmpinzindi/2017-03-12.zip',
-    'https://farmpinzindi.blob.core.windows.net/farmpinzindi/2017-03-22.zip',
-    'https://farmpinzindi.blob.core.windows.net/farmpinzindi/2017-05-31.zip',
-    'https://farmpinzindi.blob.core.windows.net/farmpinzindi/2017-06-20.zip',
-    'https://farmpinzindi.blob.core.windows.net/farmpinzindi/2017-07-10.zip',
-    'https://farmpinzindi.blob.core.windows.net/farmpinzindi/2017-08-19.zip',
-    'https://farmpinzindi.blob.core.windows.net/farmpinzindi/2017-07-15.zip',
-    'https://farmpinzindi.blob.core.windows.net/farmpinzindi/2017-08-04.zip',
-]
-
 @task(help={
     'ip': 'IP to listen on, defaults to *',
     'extra': 'Port to listen on, defaults to 8888',
@@ -51,15 +37,13 @@ def competition_list(ctx, search=None):
     ctx.run(' '.join(cmd))
 
 
-@task(help={
-    'competition': 'competition url prefix'
-})
+@task()
 def competition_download_files(ctx):
     """
     Download Kaggle competition files to ./data/raw folder
     """
 
-    cmd='wget -i urls.txt -P ./data/raw/'
+    cmd = 'wget -i urls.txt -P ./data/raw/'
     ctx.run(cmd)
 
 
@@ -73,4 +57,10 @@ def competition_submit_files(ctx, path, message, competition):
     Submit Kaggle competition files
     """
     cmd = 'kaggle competitions submit', '-c {} -f {} -m {}'.format(competition, path, message)
+    ctx.run(cmd)
+
+
+@task()
+def create_baseline_dataset(ctx, ):
+    cmd = 'python src/data/make_baseline_dataset.py'
     ctx.run(cmd)
