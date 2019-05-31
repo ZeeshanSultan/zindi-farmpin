@@ -37,7 +37,7 @@ def download_satellite_data(ctx):
 
 @task
 def create_baseline_dataset(ctx):
-    from src.data.make_baseline_dataset import run
+    from src.data.make_features_dataset import run
     print('Creating training set\n')
     run('train')
     print('\nCreating testing set\n')

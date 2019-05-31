@@ -13,7 +13,7 @@ from scipy.misc import imresize
 
 from config import raw_data_dir, processed_data_dir
 
-logger = logging.Logger(name='data-ingress')
+logger = logging.Logger(name='feature_creation')
 
 
 def get_img_bands(safe_dir):
