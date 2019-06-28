@@ -31,13 +31,18 @@ def download_satellite_data(ctx):
     Download Kaggle competition files to ./data/raw folder
     """
 
+    # Download zips
     cmd = 'wget -i urls.txt -P ./data/raw/'
+    ctx.run(cmd)
+
+    # Unzip and remove zips
+    cmd = "cd ./data/raw && unzip '*.zip' && rm *.zip"
     ctx.run(cmd)
 
 
 @task
 def create_baseline_dataset(ctx):
-    from src.data.make_baseline_dataset import run
+    from src.data.make_features_dataset import run
     print('Creating training set\n')
     run('train')
     print('\nCreating testing set\n')
