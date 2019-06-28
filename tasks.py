@@ -31,7 +31,12 @@ def download_satellite_data(ctx):
     Download Kaggle competition files to ./data/raw folder
     """
 
+    # Download zips
     cmd = 'wget -i urls.txt -P ./data/raw/'
+    ctx.run(cmd)
+
+    # Unzip and remove zips
+    cmd = "cd ./data/raw && unzip '*.zip' && rm *.zip"
     ctx.run(cmd)
 
 
