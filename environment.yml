@@ -1,9 +1,10 @@
-name: { { cookiecutter.project_slug } }
+name: zindi_farmpin
 channels:
   - anaconda
   - conda-forge
   - defaults
 dependencies:
+  - pip
   - invoke
   - jupyter
   - jupyterlab
@@ -12,12 +13,11 @@ dependencies:
   - pandas
   - pandas-profiling
   - path.py
-  - python=3.6
+  - python=3.7
   - scikit-learn
   - seaborn
   - statsmodels
   - pip:
-      - black
       - h2o
       - kaggle
       - keras
@@ -28,3 +28,7 @@ dependencies:
       - pylint
       - pyspark
       - tensorflow
+      - xgboost
+      - sklearn
+      - geopandas
+      - rasterio
