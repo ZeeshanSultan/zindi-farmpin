@@ -48,7 +48,6 @@ RUN conda env create
 #RUN conda update -n base -c defaults conda && \
 #    conda create -y -n zindi_farmpin -f environment.yml -c h2oai -c conda-forge h2o4gpu-cuda9 
 
-RUN rm /home/jovyan/environment.yml
 RUN echo "conda activate zindi_farmpin" > ~/.bashrc
 ENV PATH /opt/conda/envs/zindi_farmpin/bin:$PATH
 
