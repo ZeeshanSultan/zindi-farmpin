@@ -80,10 +80,3 @@ target/
 
 # Mac OS-specific storage files
 .DS_Store
-
-# vim
-*.swp
-*.swo
-
-# Mypy cache
-.mypy_cache/
