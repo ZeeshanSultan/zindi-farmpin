@@ -35,6 +35,10 @@ def download_satellite_data(ctx):
     cmd = 'wget -i urls.txt -P ./data/raw/'
     ctx.run(cmd)
 
+    # Download extra zips
+    cmd = 'wget -i urls_JFP.txt -P ./data/raw/'
+    ctx.run(cmd)
+
     # Unzip and remove zips
     cmd = "cd ./data/raw && unzip '*.zip' && rm *.zip"
     ctx.run(cmd)
