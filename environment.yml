@@ -3,6 +3,7 @@ channels:
   - anaconda
   - conda-forge
   - defaults
+  - pytorch
 dependencies:
   - pip
   - invoke
@@ -17,6 +18,7 @@ dependencies:
   - scikit-learn
   - seaborn
   - statsmodels
+#  - pytorch torchvision cudatoolkit=9.0
   - pip:
       - h2o
       - kaggle
@@ -27,7 +29,7 @@ dependencies:
       - plotly
       - pylint
       - pyspark
-      - tensorflow
+      - tensorflow-gpu
       - xgboost
       - sklearn
       - geopandas

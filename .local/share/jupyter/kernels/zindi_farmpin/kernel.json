@@ -1,0 +1,11 @@
+{
+ "argv": [
+  "/opt/conda/envs/zindi_farmpin/bin/python",
+  "-m",
+  "ipykernel_launcher",
+  "-f",
+  "{connection_file}"
+ ],
+ "display_name": "zindi_farmpin",
+ "language": "python"
+}

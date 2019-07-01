@@ -1,5 +1,6 @@
 # Use a docker image as base image
-FROM nvidia/cuda:9.0-cudnn7-runtime
+#FROM nvidia/cuda:9.0-cudnn7-runtime
+FROM tensorflow/tensorflow:latest-gpu-jupyter
 ENV LANG=C.UTF-8 LC_ALL=C.UTF-8
 # Declare some ARGuments
 ##ARG PYTHON_VERSION=3.6
@@ -11,6 +12,7 @@ RUN apt-get update && \
     bzip2 libopenblas-dev pbzip2 libgl1-mesa-glx && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
+
 # INSTALLATION OF CONDA
 ENV PATH /opt/conda/bin:$PATH
 
@@ -26,9 +28,9 @@ ENV TINI_VERSION v0.16.1
 ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini /usr/bin/tini
 RUN chmod +x /usr/bin/tini
 
-RUN pip --no-cache-dir install \
-    jupyter \
-    jupyterlab 
+#RUN pip --no-cache-dir install \
+#    jupyter \
+#    jupyterlab 
 
 RUN jupyter notebook --generate-config
 
@@ -38,20 +40,29 @@ RUN useradd -ms /bin/bash jovyan
 #COPY docker/dev/environment.yml /environment.yml
 
 # Use the environment.yml to create the conda environment.
-ADD docker/dev/environment.yml /tmp/environment.yml
+ADD environment.yml /tmp/environment.yml
 WORKDIR /tmp
 #RUN [ "conda", "env", "create" ]
 RUN conda env create
+
+#RUN conda install ipykernel
+#RUN conda activate zindi_farmpin && python -m ipykernel install --user --name zindi_farmpin
 
 ## startup the conda environment setup
 ### Create a conda environment to use the gpu
 #RUN conda update -n base -c defaults conda && \
 #    conda create -y -n zindi_farmpin -f environment.yml -c h2oai -c conda-forge h2o4gpu-cuda9 
 
-RUN echo "conda activate zindi_farmpin" > ~/.bashrc
+RUN echo "conda activate zindi_farmpin && python -m ipykernel install --user --name zindi_farmpin" > ~/.bashrc
 ENV PATH /opt/conda/envs/zindi_farmpin/bin:$PATH
 
 USER jovyan
+
+RUN echo "conda activate zindi_farmpin" > ~/.bashrc
+ENV PATH /opt/conda/envs/zindi_farmpin/bin:$PATH
+#RUN conda init bash
+#RUN /bin/bash -c "source /home/jovyan/.bashrc"
+#RUN conda activate zindi_farmpin && python -m ipykernel install --user --name zindi_farmpin
 
 ## Configure start for jupyter lab
 WORKDIR /home/jovyan/
