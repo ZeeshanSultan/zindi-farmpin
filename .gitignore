@@ -82,3 +82,4 @@ target/
 .DS_Store
 .bash_history
 .conda/
+.local

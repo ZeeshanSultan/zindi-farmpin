@@ -36,7 +36,7 @@ Go to the [competition page](https://zindi.africa/competitions/farm-pin-crop-det
 
 **Download satellite data**
 ```
-invoke download-satellite data
+invoke download-satellite-data
 ```
 Downloads all the satellite data and stores in `data/raw/*`
 

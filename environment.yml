@@ -6,6 +6,7 @@ channels:
   - pytorch
 dependencies:
   - pip
+  - pillow
   - invoke
   - jupyter
   - jupyterlab
