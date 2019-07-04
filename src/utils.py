@@ -4,8 +4,8 @@ import pandas as pd
 import geopandas as gpd
 
 from glob import glob
+from tqdm import tqdm
 from rasterio import mask
-
 
 from config import raw_data_dir
 
@@ -66,7 +66,14 @@ def get_shape(geom, raster):
         out_image, out_transform = mask.mask(raster, [geom], crop=True)
     except ValueError:
         return None
-    return out_image
+
+    if out_image.ndim == 3:
+        # remove the first dimension
+        return out_image[0, :, :]
+    elif out_image.ndim == 2:
+        return out_image
+    else:
+        raise ValueError('Mask has unexpected shape: {}'.format(out_image.shape))
 
 
 def mask_raster(shapes, raster, return_missing=False):
@@ -83,13 +90,19 @@ def mask_raster(shapes, raster, return_missing=False):
     masks = {}
     for id, shape in shapes.items():
         mask = get_shape(shape, raster)
+
         if mask is None:
             if return_missing:
-                masks[id] = np.ones(shape=(1, 10, 10)) * -1
+                masks[id] = np.ones(shape=(10, 10)) * -1
             else:
                 continue
-
         else:
+            assert mask.ndim == 2, 'Farm {} masking error'.format(id)
+
             masks[id] = mask
 
     return masks
+
+
+if __name__ == '__main__':
+    pass
