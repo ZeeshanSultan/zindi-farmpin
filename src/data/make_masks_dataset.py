@@ -8,6 +8,7 @@ import numpy as np
 from tqdm import tqdm
 
 import sys
+
 sys.path.append('../')
 sys.path.append('../../')
 from config import interim_data_dir
@@ -17,7 +18,11 @@ from src.utils import get_img_bands, get_safe_dirs, date_from_safedir, band_from
 logger = logging.Logger(name='data-ingress')
 
 # Dimensions to zero-pad images to
-MAX_DIMS = (100, 100)
+MAX_DIMS = {
+    '10': (90, 90),
+    '20': (50, 50),
+    '60': (20, 20)
+}
 
 
 def get_largest_dims(masks):
@@ -42,7 +47,7 @@ def safe_create_dir(dir):
         os.mkdir(dir)
 
 
-def zeropad_img(img, shape=MAX_DIMS):
+def zeropad_img(img, shape):
     """
     TODO: Normalize before padding
     TODO: Parameterize anchoring
@@ -72,6 +77,20 @@ def zeropad_img(img, shape=MAX_DIMS):
     return new_img
 
 
+def get_res_group(band):
+    """
+    Get the resolution group of a band
+    """
+    resolution_groups = {
+        '60': ['B01', 'B09', 'B10'],
+        '20': ['B05', 'B06', 'B07', 'B8A', 'B11', 'B12'],
+        '10': ['B02', 'B03', 'B04', 'B08', 'TCI']
+    }
+    [res_group] = [grp for grp, bands in resolution_groups.items() if band in bands]
+
+    return res_group
+
+
 def run(dataset='train'):
     #  Setup directories
     masks_dir = os.path.join(interim_data_dir, 'masks')
@@ -89,8 +108,10 @@ def run(dataset='train'):
     safe_dirs = get_safe_dirs()
     for safe_dir in tqdm(safe_dirs, desc='time'):
 
+        # Get the date from the SAFE dir string
         date = date_from_safedir(safe_dir)
 
+        # Create output dir --> {train/test}/{date}
         out_dir = os.path.join(dataset_dir, date)
         safe_create_dir(out_dir)
 
@@ -100,18 +121,22 @@ def run(dataset='train'):
 
         for img_fpath in img_band_fpaths:
 
+            # Grab the band from the image path
             band = band_from_imgpath(img_fpath)
+
+            # Get which resolution group this band belongs to
+            res_group = get_res_group(band)
 
             logger.info('Processing band ', band)
             with rasterio.open(img_fpath) as raster:
                 logger.info('Masking raster...')
                 masks = mask_raster(shp_df.geometry, raster, return_missing=dataset == 'test')
 
-                # Create zeropadded masks
+                # Create zero padded masks
                 logger.info('Zero padding...')
-                zp_masks = {id: zeropad_img(mask) for id, mask in masks.items()}
+                zp_masks = {id: zeropad_img(mask, shape=MAX_DIMS[res_group]) for id, mask in masks.items()}
 
-            # Save masks for each farm
+            # Save mask and zero padded mask for each farm
             for farm_id in masks.keys():
                 mask = masks[farm_id]
                 zp_mask = zp_masks[farm_id]
