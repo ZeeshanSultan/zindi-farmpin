@@ -48,7 +48,7 @@ The downloaded data is in .SAFE format, which is confusing. This command takes a
 
 **Create masks dataset**
 ```
-
+invoke create-stacked-masks-dataset
 ```
 
 **Extract baseline features**

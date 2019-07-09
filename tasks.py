@@ -51,7 +51,7 @@ def reorder_dataset(ctx):
     run()
 
 @task
-def make_stacked_masks_dataset(ctx):
+def create_stacked_masks_dataset(ctx):
     from src.data.make_stacked_masks_dataset import run
     print('Creating stacked masks dataset. Output saved under data/processed/ \n')
     run()

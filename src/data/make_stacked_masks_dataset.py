@@ -26,7 +26,7 @@ import numpy as np
 from scipy.misc import imsave
 
 from config import interim_data_dir, processed_data_dir
-from src.utils import read_shapefile, get_farm_ids, mask_raster
+from src.utils import read_shapefile, get_farm_ids, mask_raster, safe_create_dir
 
 dates = ['2017-01-01', '2017-01-31', '2017-02-10',
          '2017-03-12', '2017-03-22', '2017-05-31',
@@ -34,9 +34,9 @@ dates = ['2017-01-01', '2017-01-31', '2017-02-10',
          '2017-08-04', '2017-08-19']
 
 res_groups = {
-    # '60': ['B01', 'B09', 'B10'],
-    # '20': ['B05', 'B06', 'B07', 'B8A', 'B11', 'B12'],
-    '10': ['B02', 'B03', 'B04']  # , 'B08']
+    '60': ['B01', 'B09', 'B10'],
+    '20': ['B05', 'B06', 'B07', 'B8A', 'B11', 'B12'],
+    '10': ['B02', 'B03', 'B04', 'B08']
 }
 
 # Dimensions to zero-pad images to
@@ -49,7 +49,6 @@ MAX_DIMS = {
 classes = list(map(str, np.arange(1, 10)))
 
 output_dir = os.path.join(interim_data_dir, 'images')
-
 
 
 def load_img(date, band, label, images_dir):
@@ -148,22 +147,20 @@ def extract_data(dataset, label):
                     farm_id_class = shp_df.loc[farm_id]['Crop_Id_Ne']
 
                     out_img_fpath = os.path.join(processed_data_dir, 'stacked_images',
-                                                 f'res_{res_group}', dataset, farm_id_class, f'{farm_id}.jpg')
+                                                 f'res_{res_group}', dataset, farm_id_class, f'{farm_id}.npy')
                 else:
                     out_img_fpath = os.path.join(processed_data_dir, 'stacked_images',
-                                                 f'res_{res_group}', dataset, f'{farm_id}.jpg')
+                                                 f'res_{res_group}', dataset, f'{farm_id}.npy')
 
                 # Save the stacked image to disk
-                # save_arr(stacked_img, out_img_fpath)
-                save_img(stacked_img, out_img_fpath)
+                save_arr(stacked_img, out_img_fpath)
+                # save_img(stacked_img, out_img_fpath)
 
             print('done')
 
 
 def setup_dirs():
-    from utils import safe_create_dir
-
-    stacked_images_dir = os.path.join(interim_data_dir, 'stacked_images')
+    stacked_images_dir = os.path.join(processed_data_dir, 'stacked_images')
 
     for res_group in res_groups.keys():
         res_dir = os.path.join(stacked_images_dir, f'res_{res_group}')
