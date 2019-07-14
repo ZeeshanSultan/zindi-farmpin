@@ -83,3 +83,12 @@ target/
 .bash_history
 .conda/
 .local
+
+# vim
+*.swp
+*.swo
+
+# Mypy cache
+.mypy_cache/
+.conda/*
+.jupyter/*
