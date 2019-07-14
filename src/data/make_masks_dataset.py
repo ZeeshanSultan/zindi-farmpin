@@ -58,9 +58,9 @@ def run(dataset='train'):
     dataset_dir = os.path.join(masks_dir, dataset)
     safe_create_dir(dataset_dir)
 
-    logger.info('Creating {} feature dataset'.format(dataset))
+    # print('Creating {} feature dataset'.format(dataset))
 
-    logger.info('Reading shapefile...')
+    # print('Reading shapefile...')
     shp_df = read_shapefile(dataset)
 
     img_dirs = glob(os.path.join(interim_data_dir, 'images/*'))
@@ -72,7 +72,7 @@ def run(dataset='train'):
         date_dir = os.path.join(dataset_dir, date)
         safe_create_dir(date_dir)
 
-        logger.info('Reading image bands...')
+        # print('Reading image bands...')
         img_fpaths = glob(os.path.join(img_dir, '*.jp2'))
 
         for img_fpath in tqdm(img_fpaths, desc='images'):
@@ -81,7 +81,7 @@ def run(dataset='train'):
             band = os.path.basename(img_fpath).split('_')[0]
 
             with rasterio.open(img_fpath) as raster:
-                logger.info('Masking raster...')
+                # print('Masking raster...')
                 masks = mask_raster(shp_df.geometry, raster, return_missing=dataset == 'test')
 
                 # Save mask for each farm in raster
