@@ -4,6 +4,7 @@ channels:
   - conda-forge
   - defaults
   - pytorch
+  - menpo
 dependencies:
   - pip
   - pillow
@@ -19,6 +20,7 @@ dependencies:
   - scikit-learn
   - seaborn
   - statsmodels
+  - opencv
 #  - pytorch torchvision cudatoolkit=9.0
   - pip:
       - h2o

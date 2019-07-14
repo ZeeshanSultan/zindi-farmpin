@@ -50,6 +50,11 @@ def reorder_dataset(ctx):
     print('Re-ordering dataset --> output in data/interim/images folder \n')
     run()
 
+    # Copy and unzip and remove shapefile zips
+    #cmd = "cd ./data/raw && unzip '*.zip' && rm *.zip"
+    cmd = "cp ./references/*.zip ./data/raw/ && unzip './data/raw/*.zip' && rm ./data/raw/*.zip && mv ./train ./data/raw/ && mv ./test ./data/raw/"
+    ctx.run(cmd)
+
 @task
 def create_stacked_masks_dataset(ctx):
     from src.data.make_stacked_masks_dataset import run
