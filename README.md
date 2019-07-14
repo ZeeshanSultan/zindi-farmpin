@@ -40,6 +40,17 @@ invoke download-satellite-data
 ```
 Downloads all the satellite data and stores in `data/raw/*`
 
+**Re-order dataset**
+```
+invoke reorder-dataset
+```
+The downloaded data is in .SAFE format, which is confusing. This command takes all the image data over multiple dumps and places them in one folder. For example `data/interim/images/2017-01-01`
+
+**Create masks dataset**
+```
+invoke create-stacked-masks-dataset
+```
+
 **Extract baseline features**
 ```
 invoke create-baseline-dataset
