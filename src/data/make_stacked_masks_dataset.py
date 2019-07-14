@@ -48,7 +48,7 @@ MAX_DIMS = {
 
 classes = list(map(str, np.arange(1, 10)))
 
-output_dir = os.path.join(interim_data_dir, 'images')
+images_dir = os.path.join(interim_data_dir, 'images')
 
 
 def load_img(date, band, label, images_dir):
@@ -122,7 +122,7 @@ def extract_data(dataset, label):
             bands_data = {band: {} for band in bands}
 
             for band in bands:
-                img_fpath = os.path.join(output_dir, date, f'{band}_{label}.jp2')
+                img_fpath = os.path.join(images_dir, date, f'{band}_{label}.jp2')
 
                 with rasterio.open(img_fpath) as raster:
                     masks = mask_raster(shp_df['geometry'], raster, return_missing=dataset == 'test')
@@ -154,6 +154,8 @@ def extract_data(dataset, label):
 
                 # Save the stacked image to disk
                 save_arr(stacked_img, out_img_fpath)
+
+                # Use this when you want to save as an image (jpg / png)
                 # save_img(stacked_img, out_img_fpath)
 
             print('done')
@@ -180,7 +182,7 @@ def setup_dirs():
 def run():
     setup_dirs()
 
-    if not os.path.isdir(output_dir):
+    if not os.path.isdir(images_dir):
         raise FileNotFoundError('''
                 Images have not been reordered into interim data dir.
                  \n\nSee readme to run invoke command for re-ordering image data. 

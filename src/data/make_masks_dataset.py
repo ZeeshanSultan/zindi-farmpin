@@ -5,7 +5,9 @@ import operator
 import rasterio
 import logging
 import numpy as np
+
 from tqdm import tqdm
+from glob import glob
 
 import sys
 
@@ -23,7 +25,6 @@ MAX_DIMS = {
     '20': (50, 50),
     '60': (20, 20)
 }
-
 
 def get_largest_dims(masks):
     """
@@ -47,51 +48,8 @@ def safe_create_dir(dir):
         os.mkdir(dir)
 
 
-def zeropad_img(img, shape):
-    """
-    TODO: Normalize before padding
-    TODO: Parameterize anchoring
-
-
-    :param img:
-    :param shape:
-    :return:
-    """
-
-    # Size of border
-    v_border = int(np.ceil((shape[0] - img.shape[0]) / 2))
-    h_border = int(np.ceil((shape[1] - img.shape[1]) / 2))
-
-    v_diff = shape[0] - (img.shape[0] + 2 * v_border)
-    h_diff = shape[1] - (img.shape[1] + 2 * h_border)
-
-    new_img = cv2.copyMakeBorder(
-        img,
-        top=v_border, bottom=v_border + v_diff,
-        left=h_border, right=h_border + h_diff,
-        borderType=cv2.BORDER_CONSTANT, value=0
-    )
-
-    assert new_img.shape == shape, 'zero padding issue'
-
-    return new_img
-
-
-def get_res_group(band):
-    """
-    Get the resolution group of a band
-    """
-    resolution_groups = {
-        '60': ['B01', 'B09', 'B10'],
-        '20': ['B05', 'B06', 'B07', 'B8A', 'B11', 'B12'],
-        '10': ['B02', 'B03', 'B04', 'B08', 'TCI']
-    }
-    [res_group] = [grp for grp, bands in resolution_groups.items() if band in bands]
-
-    return res_group
-
-
 def run(dataset='train'):
+
     #  Setup directories
     masks_dir = os.path.join(interim_data_dir, 'masks')
     safe_create_dir(masks_dir)
@@ -105,54 +63,37 @@ def run(dataset='train'):
     logger.info('Reading shapefile...')
     shp_df = read_shapefile(dataset)
 
-    safe_dirs = get_safe_dirs()
-    for safe_dir in tqdm(safe_dirs, desc='time'):
+    img_dirs = glob(os.path.join(interim_data_dir, 'images/*'))
 
-        # Get the date from the SAFE dir string
-        date = date_from_safedir(safe_dir)
+    for img_dir in tqdm(img_dirs, desc='dates'):
 
-        # Create output dir --> {train/test}/{date}
-        out_dir = os.path.join(dataset_dir, date)
-        safe_create_dir(out_dir)
+        date = os.path.basename(img_dir)
+
+        date_dir = os.path.join(dataset_dir, date)
+        safe_create_dir(date_dir)
 
         logger.info('Reading image bands...')
-        img_band_fpaths = get_img_bands(safe_dir)
-        logger.info(f'\tFound {len(img_band_fpaths)} image bands to process')
+        img_fpaths = glob(os.path.join(img_dir, '*.jp2'))
 
-        for img_fpath in img_band_fpaths:
+        for img_fpath in tqdm(img_fpaths, desc='images'):
 
             # Grab the band from the image path
-            band = band_from_imgpath(img_fpath)
+            band = os.path.basename(img_fpath).split('_')[0]
 
-            # Get which resolution group this band belongs to
-            res_group = get_res_group(band)
-
-            logger.info('Processing band ', band)
             with rasterio.open(img_fpath) as raster:
                 logger.info('Masking raster...')
                 masks = mask_raster(shp_df.geometry, raster, return_missing=dataset == 'test')
 
-                # Create zero padded masks
-                logger.info('Zero padding...')
-                zp_masks = {id: zeropad_img(mask, shape=MAX_DIMS[res_group]) for id, mask in masks.items()}
+                # Save mask for each farm in raster
+                for farm_id in masks.keys():
+                    mask = masks[farm_id]
 
-            # Save mask and zero padded mask for each farm
-            for farm_id in masks.keys():
-                mask = masks[farm_id]
-                zp_mask = zp_masks[farm_id]
+                    mask_fname = os.path.join(date_dir, f'farm_{farm_id}_{band}.npy')
 
-                farm_dir = os.path.join(out_dir, str(farm_id))
-                safe_create_dir(farm_dir)
+                    np.save(mask_fname, mask)
 
-                mask_fname = os.path.join(farm_dir, f'{band}.npy')
-                zp_mask_fname = os.path.join(farm_dir, f'{band}_zp.npy')
-
-                np.save(mask_fname, mask)
-                np.save(zp_mask_fname, zp_mask)
-
-            del masks
-            del zp_masks
-            gc.collect()
+                del masks
+                gc.collect()
 
 
 if __name__ == '__main__':
