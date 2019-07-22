@@ -51,7 +51,7 @@ def upsample_raster(raster):
 def run(dataset="train"):
 
     #  Setup directories
-    masks_dir = interim_data_dir / "masks_v3"
+    masks_dir = interim_data_dir / "masks"
     safe_create_dir(masks_dir)
 
     # train / test dir under masks
@@ -69,6 +69,9 @@ def run(dataset="train"):
 
         date = date_dir.stem
 
+        out_date_dir = dataset_dir / date
+        safe_create_dir(out_date_dir)
+
         # print('Reading image bands...')
         img_fpaths = date_dir.glob("*.jp2")
 
@@ -78,8 +81,11 @@ def run(dataset="train"):
             band = img_fpath.stem
 
             if band not in valid_bands:
-                # print("Skipping", band)
+                print("Skipping", band)
                 continue
+
+            out_dir = os.path.join(out_date_dir, band)
+            safe_create_dir(out_dir)
 
             [res_group] = [grp for grp, bands in res_groups.items() if band in bands]
 
@@ -90,16 +96,9 @@ def run(dataset="train"):
 
                 # Save mask for each farm in raster
                 for farm_id in masks.keys():
-
-                    farm_dir = dataset_dir / str(farm_id)
-                    safe_create_dir(farm_dir)
-
-                    farm_date_dir = farm_dir / date
-                    safe_create_dir(farm_date_dir)
-
                     mask = masks[farm_id]
 
-                    mask_fname = farm_date_dir / f"{band}.npy"
+                    mask_fname = os.path.join(out_dir, f"farm_{farm_id}_{band}.npy")
 
                     np.save(mask_fname, mask)
 
