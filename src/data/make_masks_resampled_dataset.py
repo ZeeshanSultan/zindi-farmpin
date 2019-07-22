@@ -46,14 +46,6 @@ def safe_create_dir(dir):
     if not os.path.isdir(dir):
         os.mkdir(dir)
 
-
-def upsample_raster(raster):
-    return raster.read(
-        out_shape=(raster.height * 2, raster.width * 2, raster.count),
-        resampling=resampling.bilinear,
-    )
-
-
 from contextlib import contextmanager
 
 import rasterio
@@ -89,7 +81,7 @@ def resample_raster(raster, scale=2):
 def run(dataset="train"):
 
     #  Setup directories
-    masks_dir = interim_data_dir / "masks_v2"
+    masks_dir = interim_data_dir / "masks_resampled"
     safe_create_dir(masks_dir)
 
     # train / test dir under masks

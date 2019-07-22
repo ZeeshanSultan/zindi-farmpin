@@ -20,7 +20,7 @@ class PlotLosses(keras.callbacks.Callback):
         self.i += 1
         
         clear_output(wait=True)
-        plt.plot(self.x, self.losses, label="loss")
-        plt.plot(self.x, self.val_losses, label="val_loss")
+        plt.plot(self.x, self.losses, label="loss ({:.3f})".format(self.losses[-1]))
+        plt.plot(self.x, self.val_losses, label="val_loss ({:.3f})".format(self.val_losses[-1]))
         plt.legend()
         plt.show();

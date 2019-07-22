@@ -13,6 +13,8 @@ from rasterio import mask
 
 from config import raw_data_dir, interim_data_dir
 
+nans = lambda df: df[df.isnull().any(axis=1)]
+
 
 def make_sub(probs):
     test_sub = pd.read_csv(
@@ -54,9 +56,18 @@ def band_from_imgpath(fpath):
     return band
 
 
+def load_class_labels():
+    class_labels = pd.read_csv(raw_data_dir / "crop_id_list.csv", index_col=0)
+    return class_labels
+
+
 def read_shapefile(dataset):
     fp = os.path.join(raw_data_dir, "{}/{}.shp".format(dataset, dataset))
     sh_df = gpd.read_file(fp)
+
+    if dataset == "train":
+        class_labels = load_class_labels()
+        sh_df["y"] = sh_df.Crop_Id_Ne.astype(int).replace(class_labels.crop.to_dict())
 
     # Drop NaNs
     sh_df = sh_df.loc[~sh_df.geometry.isna()]
