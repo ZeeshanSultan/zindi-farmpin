@@ -46,6 +46,7 @@ def safe_create_dir(dir):
     if not os.path.isdir(dir):
         os.mkdir(dir)
 
+
 from contextlib import contextmanager
 
 import rasterio
@@ -115,9 +116,9 @@ def run(dataset="train"):
 
             if res_group == "20":
                 with rasterio.open(img_fpath) as raster:
-                    with resample_raster(raster, scale=2):
+                    with resample_raster(raster, scale=2) as raster_resampled:
                         # print('Masking raster...')
-                        masks = mask_raster(shp_df.geometry, raster)
+                        masks = mask_raster(shp_df.geometry, raster_resampled)
 
                         # Save mask for each farm in raster
                         for farm_id in masks.keys():
