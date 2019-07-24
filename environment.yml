@@ -3,6 +3,7 @@ channels:
   - anaconda
   - conda-forge
   - defaults
+  - menpo
 dependencies:
   - pip
   - invoke
@@ -17,9 +18,8 @@ dependencies:
   - scikit-learn
   - seaborn
   - statsmodels
+  - opencv
   - pip:
-      - h2o
-      - kaggle
       - keras
       - lightgbm
       - missingno
