@@ -4,6 +4,8 @@ from pathlib import Path
 
 root_dir = Path(os.path.dirname(os.path.abspath(__file__)))
 
+models_dir = root_dir / 'models'
+
 # Create data dir paths
 data_dir = root_dir / "data"
 interim_data_dir = data_dir / "interim"
