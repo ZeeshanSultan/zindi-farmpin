@@ -11,7 +11,7 @@ from tqdm import tqdm
 
 from rasterio import mask
 
-from config import raw_data_dir, interim_data_dir
+from config import raw_data_dir, interim_data_dir, processed_data_dir
 
 nans = lambda df: df[df.isnull().any(axis=1)]
 
@@ -81,11 +81,33 @@ def read_shapefile(dataset):
     return sh_df
 
 
+def read_shapefile_resampled(dataset):
+
+    if dataset == 'test':
+        return read_shapefile('test')
+
+    fp = processed_data_dir / 'shp_resampled' / dataset / f'{dataset}.shp'
+    sh_df = gpd.read_file(fp)
+
+    # Drop NaNs
+    sh_df = sh_df.loc[~sh_df.geometry.isna()]
+
+    # # Use Field IDs as index
+    sh_df.set_index("Field_Id", inplace=True)
+
+    # Convert shp data to correct coordinate system
+    sh_df = sh_df.to_crs({"init": "epsg:32734"})
+
+    return sh_df
+
+
 def get_mask(shape, raster):
     if shape is None:
         return None
     try:
-        mask_img, mask_transform = mask.mask(raster, [shape], crop=True)
+        mask_img, mask_transform = mask.mask(raster, [shape], crop=True, nodata=0)
+        # replace -1 with nan
+        mask_img = np.where(mask_img, mask_img, np.nan)
     except ValueError:
         return None
 
