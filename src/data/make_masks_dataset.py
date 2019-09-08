@@ -8,39 +8,32 @@ import numpy as np
 
 from tqdm import tqdm
 from glob import glob
+from rasterio.enums import Resampling as resampling
 
 import sys
 
-sys.path.append('../')
-sys.path.append('../../')
+sys.path.append("../")
+sys.path.append("../../")
 from config import interim_data_dir
 
-from src.utils import get_img_bands, get_safe_dirs, date_from_safedir, band_from_imgpath, read_shapefile, mask_raster
+from src.utils import (
+    get_img_bands,
+    get_safe_dirs,
+    date_from_safedir,
+    band_from_imgpath,
+    read_shapefile,
+    mask_raster,
+)
 
-logger = logging.Logger(name='data-ingress')
+logger = logging.Logger(name="data-ingress")
 
-# Dimensions to zero-pad images to
-MAX_DIMS = {
-    '10': (90, 90),
-    '20': (50, 50),
-    '60': (20, 20)
+valid_bands = ["B02", "B03", "B04", "B05", "B06", "B07", "B08", "B8A", "B11", "B12"]
+
+res_groups = {
+    "60": ["B01", "B09", "B10"],
+    "20": ["B05", "B06", "B07", "B8A", "B11", "B12"],
+    "10": ["B02", "B03", "B04", "B08"],
 }
-
-def get_largest_dims(masks):
-    """
-    Get the largest width and height from all farms
-    TODO: Make this better
-    """
-    # First find the largest farm
-    dims = [mask.shape for mask in masks.values()]
-
-    max_width = max([sh[0] for sh in dims])
-    max_height = max([sh[-1] for sh in dims])
-
-    del dims
-    gc.collect()
-
-    return max_width, max_height
 
 
 def safe_create_dir(dir):
@@ -48,14 +41,21 @@ def safe_create_dir(dir):
         os.mkdir(dir)
 
 
-def run(dataset='train'):
+def upsample_raster(raster):
+    return raster.read(
+        out_shape=(raster.height * 2, raster.width * 2, raster.count),
+        resampling=resampling.bilinear,
+    )
+
+
+def run(dataset="train"):
 
     #  Setup directories
-    masks_dir = os.path.join(interim_data_dir, 'masks')
+    masks_dir = interim_data_dir / "masks_v3"
     safe_create_dir(masks_dir)
 
     # train / test dir under masks
-    dataset_dir = os.path.join(masks_dir, dataset)
+    dataset_dir = masks_dir / dataset
     safe_create_dir(dataset_dir)
 
     # print('Creating {} feature dataset'.format(dataset))
@@ -63,32 +63,43 @@ def run(dataset='train'):
     # print('Reading shapefile...')
     shp_df = read_shapefile(dataset)
 
-    img_dirs = glob(os.path.join(interim_data_dir, 'images/*'))
+    date_dirs = (interim_data_dir / "images-merged").glob("*")
 
-    for img_dir in tqdm(img_dirs, desc='dates'):
+    for date_dir in tqdm(date_dirs, desc="dates"):
 
-        date = os.path.basename(img_dir)
-
-        date_dir = os.path.join(dataset_dir, date)
-        safe_create_dir(date_dir)
+        date = date_dir.stem
 
         # print('Reading image bands...')
-        img_fpaths = glob(os.path.join(img_dir, '*.jp2'))
+        img_fpaths = date_dir.glob("*.jp2")
 
-        for img_fpath in tqdm(img_fpaths, desc='images'):
+        for img_fpath in tqdm(img_fpaths, desc="images"):
 
             # Grab the band from the image path
-            band = os.path.basename(img_fpath).split('_')[0]
+            band = img_fpath.stem
+
+            if band not in valid_bands:
+                # print("Skipping", band)
+                continue
+
+            [res_group] = [grp for grp, bands in res_groups.items() if band in bands]
 
             with rasterio.open(img_fpath) as raster:
+
                 # print('Masking raster...')
-                masks = mask_raster(shp_df.geometry, raster, return_missing=dataset == 'test')
+                masks = mask_raster(shp_df.geometry, raster)
 
                 # Save mask for each farm in raster
                 for farm_id in masks.keys():
+
+                    farm_dir = dataset_dir / str(farm_id)
+                    safe_create_dir(farm_dir)
+
+                    farm_date_dir = farm_dir / date
+                    safe_create_dir(farm_date_dir)
+
                     mask = masks[farm_id]
 
-                    mask_fname = os.path.join(date_dir, f'farm_{farm_id}_{band}.npy')
+                    mask_fname = farm_date_dir / f"{band}.npy"
 
                     np.save(mask_fname, mask)
 
@@ -96,7 +107,7 @@ def run(dataset='train'):
                 gc.collect()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     logger.setLevel(logging.INFO)
-    run('train')
-    run('test')
+    run("train")
+    run("test")
