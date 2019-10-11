@@ -15,7 +15,7 @@ def readme():
 
 
 setup(
-    name='zindi_farm_pin',
+    name='farm_pin',
     version='0.1.0',
     url='',
     license='',
@@ -31,6 +31,8 @@ setup(
         'geopandas',
         'rasterio',
         'invoke',
-        'sentinelhub'
+        'sentinelhub',
+        'opencv-python',
+        'fastai'
     ]
 )

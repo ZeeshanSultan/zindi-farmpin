@@ -45,6 +45,29 @@ def download_satellite_data(ctx):
 
 
 @task
+def reorder_dataset(ctx):
+    from src.data.restructure_data import run
+    print('Re-ordering dataset --> output in data/interim/images folder \n')
+    run()
+
+@task
+def create_stacked_masks_dataset(ctx):
+    from src.data.make_stacked_masks_dataset import run
+    print('Creating stacked masks dataset. Output saved under data/processed/ \n')
+    run()
+
+@task
+def create_masks_dataset(ctx):
+    from src.data.make_masks_dataset import run
+    print('Creating stacked masks dataset. Output saved under data/interim/masks/ \n')
+
+    print('Creating training set\n')
+    run('train')
+
+    print('Creating testing set\n')
+    run('test')
+
+@task
 def create_baseline_dataset(ctx):
     from src.data.make_features_dataset import run
     print('Creating training set\n')
